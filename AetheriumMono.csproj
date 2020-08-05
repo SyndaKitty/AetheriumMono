@@ -42,7 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Mathf.cs" />
     <Compile Include="Core\GameObject.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Game.cs" />
@@ -54,10 +54,6 @@
   <ItemGroup>
     <Reference Include="Aether.Physics2D, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\Aether.Physics2D.MG.1.5.0\lib\net40\Aether.Physics2D.dll</HintPath>
-    </Reference>
-    <Reference Include="DefaultEcs, Version=0.14.3.0, Culture=neutral, PublicKeyToken=0ab8f459261ccb3c">
-      <HintPath>packages\DefaultEcs.0.14.3\lib\netstandard1.1\DefaultEcs.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\DesktopGL\MonoGame.Framework.dll</HintPath>
