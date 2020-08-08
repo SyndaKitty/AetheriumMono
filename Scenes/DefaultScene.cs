@@ -6,6 +6,7 @@ using AetheriumMono.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using tainicom.Aether.Physics2D.Content;
 using tainicom.Aether.Physics2D.Dynamics;
 
@@ -16,7 +17,9 @@ namespace AetheriumMono.Scenes
         BasicEffect spriteBatchEffect;
         GraphicsDeviceManager graphics;
         World physicsWorld;
-        
+
+        KeyboardState keyboard;
+
         float T = 0;
         const float PTU = 1f / 100;
         const float UTP = 1f / PTU;
@@ -29,6 +32,7 @@ namespace AetheriumMono.Scenes
 
         // Content
         Texture2D apogeeTexture;
+        Texture2D squareTexture;
         Dictionary<string, BodyTemplate> bodyTemplates;
 
         public DefaultScene(GraphicsDeviceManager graphics)
@@ -42,50 +46,74 @@ namespace AetheriumMono.Scenes
             physicsWorld = new World(gravity);
         }
 
-        PhysicsObject ship;
-
         public void LoadContent(ContentManager content)
         {
             spriteBatchEffect = new BasicEffect(graphics.GraphicsDevice);
             spriteBatchEffect.TextureEnabled = true;
 
+            // Textures
             apogeeTexture = content.Load<Texture2D>("Hulls/apogee");
-            var squareTexture = content.Load<Texture2D>("Hulls/Square");
+            squareTexture = content.Load<Texture2D>("Hulls/Square");
+
+            // Body templates
             bodyTemplates = PhysicsShapeLoader.LoadBodies(File.ReadAllText("./content/Bodies.xml"));
 
-            Body body = bodyTemplates["apogee"].Create(physicsWorld);
-            body.BodyType = BodyType.Dynamic;
+            // Scene setup
+            ship = CreateShip(apogeeTexture, bodyTemplates["apogee"], Vector2.Zero);
             
-            ship = CreatePhysicsObject(apogeeTexture, body);
-            ship.GameObject.Texture = apogeeTexture;
-            //ship.Body.ApplyForce(Vector2.One * 1000);
+            square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
-            Body body2 = bodyTemplates["Square"].Create(physicsWorld);
-            body2.BodyType = BodyType.Dynamic;
-            square = CreatePhysicsObject(squareTexture, body2);
-            square.GameObject.Texture = squareTexture;
-            //ship.GameObject.Position.X = -1;
-            square.Body.Position = new Vector2(-10, 0);
+            for (int i = 0; i < 10000; i++)
+            {
+                var go = SetupGameObject(new GameObject(), squareTexture);
+                go.Scale = new Vector2(.02f, .02f);
+                go.Position = new Vector2(Mathf.Random(-100, 100), Mathf.Random(-100, 100));
+            }
         }
 
         PhysicsObject square;
+        Ship ship;
 
-        GameObject CreateGameObject(Texture2D texture)
+        #region Creation Methods
+
+        Ship CreateShip(Texture2D texture, BodyTemplate bodyTemplate, Vector2 position)
         {
-            GameObject go = new GameObject(texture);
-            gameObjects.Add(go);
-            return go;
+            Ship ship = new Ship();
+            SetupPhysicsObject(ship, texture, bodyTemplate);
+            return ship;
         }
 
-        PhysicsObject CreatePhysicsObject(Texture2D texture, Body body)
+        Body CreateDynamicBody(BodyTemplate bodyTemplate)
         {
-            var go = CreateGameObject(texture);
-            var po = new PhysicsObject(go, body);
-            physicsObjects.Add(po);
-            go.Offset += body.LocalCenter / PTU;
-
-            return po;
+            var body = bodyTemplate.Create(physicsWorld);
+            body.BodyType = BodyType.Dynamic;
+            return body;
         }
+
+        PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate)
+            => SetupPhysicsObject(physicsObject, texture, bodyTemplate, Vector2.Zero);
+
+        PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate, Vector2 position)
+        {
+            var body = CreateDynamicBody(bodyTemplate);
+            body.Position = position;
+            physicsObject.Body = body;
+
+            physicsObject.Offset += body.LocalCenter / PTU;
+
+            physicsObjects.Add(physicsObject);
+            SetupGameObject(physicsObject, texture);
+            return physicsObject;
+        }
+
+        GameObject SetupGameObject(GameObject gameObject, Texture2D texture)
+        {
+            gameObject.Texture = texture;
+            gameObjects.Add(gameObject);
+            return gameObject;
+        }
+
+        #endregion
 
         public void Render(SpriteBatch spriteBatch)
         {
@@ -98,27 +126,59 @@ namespace AetheriumMono.Scenes
             {
                 if (go.Texture == null) continue;
                 var origin = new Vector2(go.Texture.Width * 0.5f, go.Texture.Height * 0.5f);
-                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, origin, Vector2.One * PTU, SpriteEffects.FlipVertically, 0);
+                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, origin, PTU * go.Scale, SpriteEffects.FlipVertically, 0);
             }
             spriteBatch.End();
         }
 
         public void Update(float deltaTime)
         {
-            square.Body.ApplyForce(Vector2.UnitX * 10);
+            cameraPosition.X = ship.Position.X;
+            cameraPosition.Y = ship.Position.Y;
+
+            keyboard = Keyboard.GetState();
 
             T += deltaTime;
             physicsWorld.Step(deltaTime);
 
             foreach (var physicsObject in physicsObjects)
             {
-                var go = physicsObject.GameObject;
                 var body = physicsObject.Body;
-                //Console.WriteLine(body.Position + " " + body.Rotation + " m:" + body.
-                //);
-                go.Position = body.Position;
-                go.Rotation = body.Rotation;
+
+                physicsObject.Position = body.Position;
+                physicsObject.Rotation = body.Rotation;
             }
+
+            // Scene specific
+            square.Body.ApplyForce(Vector2.UnitX * 0.8f);
+            ControlShip();
+        }
+
+        void ControlShip()
+        {
+            float forward = 0;
+            float strafe = 0;
+            float rotation = 0;
+            
+            if (keyboard.IsKeyDown(Keys.W))
+                forward += 1;
+            if (keyboard.IsKeyDown(Keys.S))
+                forward -= 1;
+            if (keyboard.IsKeyDown(Keys.LeftShift))
+            {
+                if (keyboard.IsKeyDown(Keys.A))
+                    strafe -= 1;
+                if (keyboard.IsKeyDown(Keys.D))
+                    strafe += 1;
+            }
+            else
+            {
+                if (keyboard.IsKeyDown(Keys.A))
+                    rotation += 1;
+                if (keyboard.IsKeyDown(Keys.D))
+                    rotation -= 1;    
+            }
+            ship.Control(forward, strafe, rotation);
         }
     }
 }

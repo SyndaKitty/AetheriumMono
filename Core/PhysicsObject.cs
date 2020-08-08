@@ -1,16 +1,13 @@
-﻿using tainicom.Aether.Physics2D.Dynamics;
+﻿using Microsoft.Xna.Framework;
+using tainicom.Aether.Physics2D.Dynamics;
 
 namespace AetheriumMono.Core
 {
-    public class PhysicsObject
+    public class PhysicsObject : GameObject
     {
-        public GameObject GameObject { get; private set; }
         public Body Body { get; set; }
 
-        public PhysicsObject(GameObject gameObject, Body body)
-        {
-            GameObject = gameObject;
-            Body = body;
-        }
+        public Vector2 Forward => new Vector2(-Mathf.Sin(Body.Rotation), Mathf.Cos(Body.Rotation));
+        public Vector2 Right => new Vector2(Mathf.Cos(Body.Rotation), Mathf.Sin(Body.Rotation));
     }
 }

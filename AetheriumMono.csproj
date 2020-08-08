@@ -51,6 +51,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenes\DefaultScene.cs" />
+    <Compile Include="Ship.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Aether.Physics2D, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
