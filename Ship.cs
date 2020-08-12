@@ -1,5 +1,4 @@
-﻿using System;
-using AetheriumMono.Core;
+﻿using AetheriumMono.Core;
 using Microsoft.Xna.Framework;
 
 namespace AetheriumMono
@@ -10,8 +9,8 @@ namespace AetheriumMono
         float strafeThrust = 6;
         float rotationThrust = 1;
 
-        float cancelVelocityBonus = 1.3f; // Percent gained (1 = +100%)
-        float cancelAngularVelocityBonus = 1.3f; // Percent gained (1 = +100%)
+        float cancelVelocityBonus = 1f; // Percent gained (1 = +100%)
+        float cancelAngularVelocityBonus = 1f; // Percent gained (1 = +100%)
 
         public void Control(float forwardAmount, float strafeAmount, float rotationAmount)
         {
@@ -40,9 +39,11 @@ namespace AetheriumMono
             }
 
             Body.ApplyForce(forwardVector + strafeVector,Body.WorldCenter);
+            
 
             // Cancel angular velocity bonus
-            if (Mathf.Sign(Body.AngularVelocity) != Mathf.Sign(rotationAmount))
+            var w = Mathf.Sign(Body.AngularVelocity);
+            if (w != Mathf.Sign(rotationAmount) && w != 0)
             {
                 rotationAmount *= (1 + cancelAngularVelocityBonus);
             }

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Content;
 using tainicom.Aether.Physics2D.Dynamics;
 
@@ -31,8 +32,7 @@ namespace AetheriumMono.Scenes
         float cameraViewWidth = 20;
 
         // Content
-        Texture2D apogeeTexture;
-        Texture2D squareTexture;
+        LiveContent liveContent;
         Dictionary<string, BodyTemplate> bodyTemplates;
 
         public DefaultScene(GraphicsDeviceManager graphics)
@@ -42,6 +42,7 @@ namespace AetheriumMono.Scenes
 
         public void Initialize()
         {
+            liveContent = new LiveContent(graphics.GraphicsDevice);
             Vector2 gravity = Vector2.Zero;
             physicsWorld = new World(gravity);
         }
@@ -51,15 +52,17 @@ namespace AetheriumMono.Scenes
             spriteBatchEffect = new BasicEffect(graphics.GraphicsDevice);
             spriteBatchEffect.TextureEnabled = true;
 
-            // Textures
-            apogeeTexture = content.Load<Texture2D>("Hulls/shiptest2");
-            squareTexture = content.Load<Texture2D>("Hulls/Square");
+            liveContent.ReadMetadata("Content.yaml");
+            
+            Texture2D shipTexture = liveContent.GetTexture("Hulls/ship.png");
+            Texture2D squareTexture = liveContent.GetTexture("square.png");
+            List<Vertices> shipPolygons = liveContent.GetPolygons("Hulls/ship.png");
 
             // Body templates
             bodyTemplates = PhysicsShapeLoader.LoadBodies(File.ReadAllText("./content/Bodies.xml"));
 
             // Scene setup
-            ship = CreateShip(apogeeTexture, bodyTemplates["apogee"], Vector2.Zero);
+            ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], Vector2.Zero);
 
             square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
@@ -130,10 +133,16 @@ namespace AetheriumMono.Scenes
             spriteBatch.End();
         }
 
+        float fakeAngularVelocity = 0;
+
         public void Update(float deltaTime)
         {
             ship.Control(0, 0, 1);
-            
+
+            Console.WriteLine(ship.Body.Inertia);
+
+            fakeAngularVelocity += 1 * deltaTime / ship.Body.Inertia;
+
             cameraPosition.X = ship.Position.X;
             cameraPosition.Y = ship.Position.Y;
 
@@ -154,10 +163,10 @@ namespace AetheriumMono.Scenes
             square.Body.ApplyForce(Vector2.UnitX * 0.8f);
             //ControlShip();
 
-            
-            Console.WriteLine(ship.Body.AngularDamping);
-            Console.WriteLine(T + " " + ship.Body.AngularVelocity * ship.Body.Inertia + " " + (ship.Body.AngularVelocity * ship.Body.Inertia - T));
+            //Console.WriteLine(ship.Body.AngularVelocity + " " + fakeAngularVelocity);
+            Console.WriteLine(ship.Body.AngularVelocity / fakeAngularVelocity);
         }
+
 
         void ControlShip()
         {

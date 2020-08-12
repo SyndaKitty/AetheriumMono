@@ -1,0 +1,12 @@
+Hulls/ship.png:
+  texture:
+  texturePolygons:
+    detectHoles: true
+    scaleFactor: 500
+    tolerance: 0.1
+square.png:
+  texture:
+  texturePolygons:
+    detectHoles: false
+    scaleFactor: 10
+    tolerance: 0.1

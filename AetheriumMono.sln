@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AetheriumMono", "AetheriumMono.csproj", "{1FF0FA7A-3871-490B-BD61-C951F27C6B26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Physics2DImporters.WINDOWS.MG", "..\Aether.Physics2D\Content.Pipeline\Physics2DImporters\Physics2DImporters.WINDOWS.MG.csproj", "{14B7BD4A-BD70-4564-BD11-8F0036BA20E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aether.Physics2D.WINDOWS.MG", "..\Aether.Physics2D\Physics2D\Aether.Physics2D.WINDOWS.MG.csproj", "{58A4F378-3FC5-4616-BC62-5FF5DF676627}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{1FF0FA7A-3871-490B-BD61-C951F27C6B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FF0FA7A-3871-490B-BD61-C951F27C6B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FF0FA7A-3871-490B-BD61-C951F27C6B26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14B7BD4A-BD70-4564-BD11-8F0036BA20E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14B7BD4A-BD70-4564-BD11-8F0036BA20E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14B7BD4A-BD70-4564-BD11-8F0036BA20E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14B7BD4A-BD70-4564-BD11-8F0036BA20E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58A4F378-3FC5-4616-BC62-5FF5DF676627}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58A4F378-3FC5-4616-BC62-5FF5DF676627}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58A4F378-3FC5-4616-BC62-5FF5DF676627}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58A4F378-3FC5-4616-BC62-5FF5DF676627}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
