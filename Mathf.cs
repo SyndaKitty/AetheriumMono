@@ -35,11 +35,10 @@ namespace AetheriumMono
             return value;
         }
 
-        public static float Sign(float value)
+        public static int Sign(float value)
         {
             if (value < 0) return -1;
-            if (Math.Abs(value) < float.Epsilon) return 0;
-            return 1;
+            return Math.Abs(value) < float.Epsilon ? 0 : 1;
         }
     }
 }

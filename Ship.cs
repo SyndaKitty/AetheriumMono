@@ -6,12 +6,12 @@ namespace AetheriumMono
 {
     public class Ship : PhysicsObject
     {
-        float forwardThrust = 6;
-        float strafeThrust = 2;
-        float rotationThrust = 2;
+        float forwardThrust = 12;
+        float strafeThrust = 6;
+        float rotationThrust = 1;
 
-        float cancelVelocityBonus = 1; // Percent gained (1 = +100%)
-        float cancelAngularVelocityBonus = 1; // Percent gained (1 = +100%)
+        float cancelVelocityBonus = 1.3f; // Percent gained (1 = +100%)
+        float cancelAngularVelocityBonus = 1.3f; // Percent gained (1 = +100%)
 
         public void Control(float forwardAmount, float strafeAmount, float rotationAmount)
         {
@@ -42,7 +42,6 @@ namespace AetheriumMono
             Body.ApplyForce(forwardVector + strafeVector,Body.WorldCenter);
 
             // Cancel angular velocity bonus
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (Mathf.Sign(Body.AngularVelocity) != Mathf.Sign(rotationAmount))
             {
                 rotationAmount *= (1 + cancelAngularVelocityBonus);

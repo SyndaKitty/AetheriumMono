@@ -21,7 +21,7 @@ namespace AetheriumMono.Scenes
         KeyboardState keyboard;
 
         float T = 0;
-        const float PTU = 1f / 100;
+        const float PTU = 1f / 500;
         const float UTP = 1f / PTU;
 
         // Objects
@@ -52,7 +52,7 @@ namespace AetheriumMono.Scenes
             spriteBatchEffect.TextureEnabled = true;
 
             // Textures
-            apogeeTexture = content.Load<Texture2D>("Hulls/apogee");
+            apogeeTexture = content.Load<Texture2D>("Hulls/shiptest2");
             squareTexture = content.Load<Texture2D>("Hulls/Square");
 
             // Body templates
@@ -60,15 +60,16 @@ namespace AetheriumMono.Scenes
 
             // Scene setup
             ship = CreateShip(apogeeTexture, bodyTemplates["apogee"], Vector2.Zero);
-            
+
             square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 var go = SetupGameObject(new GameObject(), squareTexture);
-                go.Scale = new Vector2(.02f, .02f);
-                go.Position = new Vector2(Mathf.Random(-100, 100), Mathf.Random(-100, 100));
+                go.Scale = new Vector2(.2f, .2f);
+                go.Position = new Vector2(Mathf.Random(-1000, 1000), Mathf.Random(-1000, 1000));
             }
+
         }
 
         PhysicsObject square;
@@ -98,8 +99,6 @@ namespace AetheriumMono.Scenes
             var body = CreateDynamicBody(bodyTemplate);
             body.Position = position;
             physicsObject.Body = body;
-
-            physicsObject.Offset += body.LocalCenter / PTU;
 
             physicsObjects.Add(physicsObject);
             SetupGameObject(physicsObject, texture);
@@ -133,6 +132,8 @@ namespace AetheriumMono.Scenes
 
         public void Update(float deltaTime)
         {
+            ship.Control(0, 0, 1);
+            
             cameraPosition.X = ship.Position.X;
             cameraPosition.Y = ship.Position.Y;
 
@@ -151,7 +152,11 @@ namespace AetheriumMono.Scenes
 
             // Scene specific
             square.Body.ApplyForce(Vector2.UnitX * 0.8f);
-            ControlShip();
+            //ControlShip();
+
+            
+            Console.WriteLine(ship.Body.AngularDamping);
+            Console.WriteLine(T + " " + ship.Body.AngularVelocity * ship.Body.Inertia + " " + (ship.Body.AngularVelocity * ship.Body.Inertia - T));
         }
 
         void ControlShip()
