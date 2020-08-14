@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using AetheriumMono.Core;
+﻿using AetheriumMono.Core;
 using AetheriumMono.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using tainicom.Aether.Physics2D.Common;
 
 namespace AetheriumMono
 {
@@ -22,7 +19,7 @@ namespace AetheriumMono
             graphics.ApplyChanges();
 
             Content.RootDirectory = "Content";
-            currentScene = new DefaultScene(graphics);
+            currentScene = new DefaultScene(GraphicsDevice);
         }
 
         protected override void Initialize()
@@ -47,12 +44,14 @@ namespace AetheriumMono
         protected override void Update(GameTime gameTime)
         {
             currentScene.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
             currentScene.Render(spriteBatch);
+            base.Draw(gameTime);
         }
     }
 }

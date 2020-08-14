@@ -50,8 +50,6 @@ namespace AetheriumMono.Data
 
                         PolygonShape polygon = new PolygonShape(vertices, density);
 
-                        // It doesn't look like Aether supports having multiple polygons per fixture
-                        // so we need to create a fixture for each polygon instead
                         FixtureTemplate fixture = new FixtureTemplate();
                         fixture.Shape = polygon;
                         body.Fixtures.Add(fixture);
