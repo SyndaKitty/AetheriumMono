@@ -68,18 +68,21 @@ namespace AetheriumMono.Scenes
             bodyTemplates = PhysicsShapeLoader.LoadBodies(File.ReadAllText("./content/Bodies.xml"));
 
             // Scene setup
-            ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], Vector2.Zero);
+            //ship = CreateShip(shipTexture, TemplateFromVertices(shipPolygons, 1.0f), Vector2.Zero);
+            ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], new Vector2(0, 0));
+            ship.Body.LocalCenter = Vector2.Zero;
 
-            square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
+            //square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
             polygonEffect = new BasicEffect(graphics);
             polygonEffect.VertexColorEnabled = true;
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 var go = SetupGameObject(new GameObject(), squareTexture);
                 go.Scale = new Vector2(.2f, .2f);
-                go.Position = new Vector2(Mathf.Random(-1000, 1000), Mathf.Random(-1000, 1000));
+                var squareRadius = 500;
+                go.Position = new Vector2(Mathf.Random(-squareRadius, squareRadius), Mathf.Random(-squareRadius, squareRadius));
             }
 
         }
@@ -88,6 +91,20 @@ namespace AetheriumMono.Scenes
         Ship ship;
 
         #region Creation Methods
+
+        BodyTemplate TemplateFromVertices(List<Vertices> vertices, float density)
+        {
+            BodyTemplate body = new BodyTemplate();
+
+            foreach (var polygon in vertices)
+            {
+                var fixture = new FixtureTemplate();
+                fixture.Shape = new PolygonShape(polygon, density);
+                body.Fixtures.Add(fixture);
+            }
+
+            return body;
+        }
 
         Ship CreateShip(Texture2D texture, BodyTemplate bodyTemplate, Vector2 position)
         {
@@ -100,6 +117,7 @@ namespace AetheriumMono.Scenes
         {
             var body = bodyTemplate.Create(physicsWorld);
             body.BodyType = BodyType.Dynamic;
+            body.SleepingAllowed = false;
             return body;
         }
 
@@ -233,11 +251,13 @@ namespace AetheriumMono.Scenes
 
         public void Update(float deltaTime)
         {
-            ship.Control(0, 0, 1);
+            float rotationAmount = .2f;
+
+            ship.Control(0, 0, rotationAmount);
 
             Console.WriteLine(ship.Body.Inertia);
 
-            fakeAngularVelocity += 1 * deltaTime / ship.Body.Inertia;
+            fakeAngularVelocity += rotationAmount * deltaTime / ship.Body.Inertia;
 
             cameraPosition.X = ship.Position.X;
             cameraPosition.Y = ship.Position.Y;
@@ -256,7 +276,7 @@ namespace AetheriumMono.Scenes
             }
 
             // Scene specific
-            square.Body.ApplyForce(Vector2.UnitX * 0.8f);
+            //square.Body.ApplyForce(Vector2.UnitX * 0.8f);
             //ControlShip();
 
             Console.WriteLine(ship.Body.AngularVelocity + " " + fakeAngularVelocity + " " + ship.Body.AngularVelocity / fakeAngularVelocity);

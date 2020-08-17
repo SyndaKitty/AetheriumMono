@@ -23,6 +23,8 @@ namespace AetheriumMono.Data
 
             float ptm = 1f / (float)Convert.ToDouble(bodyXml.XPathSelectElement("bodydef/metadata/ptm_ratio").Value);
 
+            World world = new World();
+
             var xmlBodies = bodyXml.XPathSelectElements("bodydef/bodies/body");
             foreach (var xmlBody in xmlBodies)
             {
@@ -55,6 +57,14 @@ namespace AetheriumMono.Data
                         body.Fixtures.Add(fixture);
                         body.Mass = 1;
                     }
+                }
+
+                var actualBody = body.Create(world);
+                actualBody.BodyType = BodyType.Dynamic;
+                foreach (var fixture in body.Fixtures)
+                {
+                    var polygon = (PolygonShape)fixture.Shape;
+                    polygon.Vertices.Translate(-actualBody.LocalCenter);
                 }
             }
 

@@ -113,7 +113,7 @@ namespace AetheriumMono.Core
         void LoadPolygons(string assetKey, Texture2D texture, ImportData importData)
         {
             assetKey = assetKey.ToLower();
-            int scaleFactor = importData.GetInt("scaleFactor");
+            float scaleFactor = 1f / importData.GetInt("scaleFactor");
             bool detectHoles = importData.GetBool("detectHoles");
             float tolerance = importData.GetFloat("tolerance");
 
@@ -129,7 +129,7 @@ namespace AetheriumMono.Core
             outline.Translate(ref centroid);
             outline = SimplifyTools.DouglasPeuckerSimplify(outline, tolerance);
             List<Vertices> result = Triangulate.ConvexPartition(outline, TriangulationAlgorithm.Bayazit);
-            Vector2 scale = new Vector2(scaleFactor);
+            Vector2 scale = new Vector2(scaleFactor, -scaleFactor);
             foreach (Vertices vertices in result)
             {
                 vertices.Scale(ref scale);

@@ -38,7 +38,7 @@ namespace AetheriumMono
                 strafeVector *= (1 + -strafeDot * cancelAngularVelocityBonus);
             }
 
-            Body.ApplyForce(forwardVector + strafeVector,Body.WorldCenter);
+            Body.ApplyForce(forwardVector + strafeVector, Body.WorldCenter);
             
 
             // Cancel angular velocity bonus
