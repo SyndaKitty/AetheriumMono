@@ -8,7 +8,7 @@ namespace AetheriumMono.Core
         public virtual Vector2 Position { get; set; }
         public float Depth { get; set; }
         public Vector2 Offset;
-        public Vector2 Scale = new Vector2(1, 1);
+        public virtual Vector2 Scale { get; set; } = new Vector2(1, 1);
 
         public virtual float Rotation { get; set; }
         public Texture2D Texture;

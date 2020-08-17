@@ -1,5 +1,7 @@
 ﻿using AetheriumMono.Core;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using tainicom.Aether.Physics2D.Content;
 
 namespace AetheriumMono
 {
@@ -7,10 +9,21 @@ namespace AetheriumMono
     {
         float forwardThrust = 12;
         float strafeThrust = 6;
-        float rotationThrust = 1;
+        float rotationThrust = 3;
 
         float cancelVelocityBonus = 1f; // Percent gained (1 = +100%)
         float cancelAngularVelocityBonus = 1f; // Percent gained (1 = +100%)
+
+        IScene scene;
+        Texture2D bulletTexture;
+        BodyTemplate bulletTemplate;
+
+        public void SetAssets(IScene scene, Texture2D bulletTexture, BodyTemplate bulletTemplate)
+        {
+            this.scene = scene;
+            this.bulletTexture = bulletTexture;
+            this.bulletTemplate = bulletTemplate;
+        }
 
         public void Control(float forwardAmount, float strafeAmount, float rotationAmount)
         {
@@ -33,13 +46,14 @@ namespace AetheriumMono
             {
                 forwardVector *= (1 + -forwardDot * cancelVelocityBonus);
             }
+
             if (strafeDot < 0)
             {
                 strafeVector *= (1 + -strafeDot * cancelAngularVelocityBonus);
             }
 
             Body.ApplyForce(forwardVector + strafeVector, Body.WorldCenter);
-            
+
 
             // Cancel angular velocity bonus
             var w = Mathf.Sign(Body.AngularVelocity);
@@ -47,7 +61,18 @@ namespace AetheriumMono
             {
                 rotationAmount *= (1 + cancelAngularVelocityBonus);
             }
+
             Body.ApplyTorque(rotationAmount * rotationThrust);
+        }
+
+        public void Shoot()
+        {
+            var creationPosition = Position + Forward * 4;
+            var scale = Vector2.One * 0.2f;
+
+            var bullet = scene.SetupPhysicsObject(new PhysicsObject(), bulletTexture, bulletTemplate, creationPosition, scale);
+            bullet.Body.LinearVelocity = Forward * 10;
+
         }
     }
 }
