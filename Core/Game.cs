@@ -1,9 +1,8 @@
-﻿using AetheriumMono.Core;
-using AetheriumMono.Scenes;
+﻿using AetheriumMono.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace AetheriumMono
+namespace AetheriumMono.Core
 {
     public class Game : Microsoft.Xna.Framework.Game
     {

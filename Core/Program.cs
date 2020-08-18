@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AetheriumMono
+namespace AetheriumMono.Core
 {
     public static class Program
     {

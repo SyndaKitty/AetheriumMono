@@ -1,7 +1,6 @@
 ﻿using System;
-using Microsoft.Xna.Framework;
 
-namespace AetheriumMono
+namespace AetheriumMono.Core
 {
     public static class Mathf
     {

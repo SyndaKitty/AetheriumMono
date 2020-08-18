@@ -25,5 +25,6 @@ namespace AetheriumMono.Core
         PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate,
             Vector2 position, Vector2 scale);
 
+        void Destroy(GameObject go);
     }
 }

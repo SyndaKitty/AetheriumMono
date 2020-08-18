@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using AetheriumMono.Core;
 using AetheriumMono.Data;
+using AetheriumMono.Game;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,6 +13,7 @@ using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Content;
 using tainicom.Aether.Physics2D.Dynamics;
+using tainicom.Aether.Physics2D.Dynamics.Contacts;
 
 namespace AetheriumMono.Scenes
 {
@@ -35,6 +36,7 @@ namespace AetheriumMono.Scenes
 
         List<GameObject> gameObjects = new List<GameObject>(256);
         List<PhysicsObject> physicsObjects = new List<PhysicsObject>(256);
+        List<GameObject> destroyed = new List<GameObject>();
         Vector3 cameraPosition;
         float cameraViewWidth = 20;
 
@@ -114,10 +116,6 @@ namespace AetheriumMono.Scenes
             }
             spriteBatch.End();
 
-            var rast = new RasterizerState();
-            rast.CullMode = CullMode.None;
-            graphics.RasterizerState = rast;
-
             if (renderColliders)
             {
                 foreach (var physicsObject in physicsObjects)
@@ -169,6 +167,16 @@ namespace AetheriumMono.Scenes
             ControlShip();
 
             //Console.WriteLine(ship.Body.AngularVelocity + " " + fakeAngularVelocity + " " + ship.Body.AngularVelocity / fakeAngularVelocity);
+
+            if (destroyed.Count > 0)
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                gameObjects.RemoveAll(x => destroyed.Contains(x));
+                physicsObjects.RemoveAll(x => destroyed.Contains(x));
+                sw.Stop();
+                Console.WriteLine(sw.ElapsedMilliseconds);
+                destroyed.Clear();
+            }
         }
 
 
@@ -184,6 +192,7 @@ namespace AetheriumMono.Scenes
                 forward -= 1;
             if (keyboard.IsKeyDown(Keys.LeftShift))
             {
+                // strafe mode
                 if (keyboard.IsKeyDown(Keys.A))
                     strafe -= 1;
                 if (keyboard.IsKeyDown(Keys.D))
@@ -256,12 +265,18 @@ namespace AetheriumMono.Scenes
             var body = CreateDynamicBody(bodyTemplateCopy);
             body.Position = position;
             physicsObject.Body = body;
+            body.Tag = physicsObject;
 
             CalculateVertices(physicsObject);
 
             physicsObjects.Add(physicsObject);
             SetupGameObject(physicsObject, texture);
             return physicsObject;
+        }
+
+        public void Destroy(GameObject go)
+        {
+            destroyed.Add(go);
         }
 
         void CalculateVertices(PhysicsObject physicsObject)
@@ -311,7 +326,7 @@ namespace AetheriumMono.Scenes
                         break;
                 }
             }
-
+             
             physicsObject.Vertices = vertices.ToArray();
             physicsObject.Indices = indices.ToArray();
             physicsObject.LineIndices = lineIndices.ToArray();

@@ -2,8 +2,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using tainicom.Aether.Physics2D.Content;
+using tainicom.Aether.Physics2D.Dynamics;
+using tainicom.Aether.Physics2D.Dynamics.Contacts;
 
-namespace AetheriumMono
+namespace AetheriumMono.Game
 {
     public class Ship : PhysicsObject
     {
@@ -70,9 +72,12 @@ namespace AetheriumMono
             var creationPosition = Position + Forward * 4;
             var scale = Vector2.One * 0.2f;
 
-            var bullet = scene.SetupPhysicsObject(new PhysicsObject(), bulletTexture, bulletTemplate, creationPosition, scale);
-            bullet.Body.LinearVelocity = Forward * 10;
-
+            var bullet = (Laser)scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale);
+            bullet.Scene = scene;
+            bullet.Source = this;
+            bullet.Body.LinearVelocity =/* Body.LinearVelocity +*/ Forward * 10;
+            bullet.Body.IsBullet = true;
+            bullet.Body.OnCollision += bullet.OnCollision;
         }
     }
 }
