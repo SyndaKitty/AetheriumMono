@@ -1,4 +1,5 @@
 ﻿using AetheriumMono.Core;
+using AetheriumMono.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using tainicom.Aether.Physics2D.Content;
@@ -7,9 +8,9 @@ namespace AetheriumMono.Game
 {
     public class Ship : PhysicsObject, IHealth
     {
-        float forwardThrust = 12;
-        float strafeThrust = 6;
-        float rotationThrust = 3;
+        float forwardThrust = 15;
+        float strafeThrust = 5;
+        float rotationThrust = 4;
 
         float cancelVelocityBonus = 1f; // Percent gained (1 = +100%)
         float cancelAngularVelocityBonus = 1f; // Percent gained (1 = +100%)
@@ -79,16 +80,17 @@ namespace AetheriumMono.Game
 
         public void Shoot()
         {
-            var creationPosition = Position + Forward * 4;
+            var creationPosition = Position + Forward * 2;
             var scale = Vector2.One * 0.2f;
 
             var bullet = (Laser)scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale);
             bullet.Scene = scene;
-            //bullet.Source = this;
-            bullet.Body.LinearVelocity =/* Body.LinearVelocity +*/ Forward * 2;
+            bullet.Source = this;
+            bullet.Body.LinearVelocity = Body.LinearVelocity + Forward * 10;
             bullet.Body.IsBullet = true;
             bullet.Body.OnCollision += bullet.OnCollision;
             bullet.Damage = 10;
+            bullet.Body.Rotation = Rotation;
         }
     }
 }

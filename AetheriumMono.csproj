@@ -45,6 +45,8 @@
     <Compile Include="Core\LiveContent.cs" />
     <Compile Include="Core\PhysicsObject.cs" />
     <Compile Include="Core\Util.cs" />
+    <Compile Include="Data\BodyData.cs" />
+    <Compile Include="Data\FixtureData.cs" />
     <Compile Include="Data\PhysicsShapeLoader.cs" />
     <Compile Include="Core\Mathf.cs" />
     <Compile Include="Core\GameObject.cs" />

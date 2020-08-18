@@ -18,8 +18,6 @@ namespace AetheriumMono.Game
 
             Console.WriteLine("OnCollision " + bullet.Body.Tag + " " + target.Body.Tag);
 
-            Scene.Destroy(this);
-            
             var collision = target.Body.Tag != Source;
 
             if (collision && target.Body.Tag is IHealth health)
@@ -27,7 +25,11 @@ namespace AetheriumMono.Game
                 health.TakeDamage(Damage);
             }
 
-            if (collision) Disabled = true;
+            if (collision)
+            {
+                Disabled = true;
+                Scene.Destroy(this);
+            }
             return collision;
 
         }

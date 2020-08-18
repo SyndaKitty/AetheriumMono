@@ -74,7 +74,7 @@ namespace AetheriumMono.Scenes
             // Scene setup
             //ship = CreateShip(shipTexture, TemplateFromVertices(shipPolygons, 1.0f), Vector2.Zero, shipTexture, TemplateFromVertices(shipPolygons, 1.0f));
             
-            var ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], new Vector2(0, 0), shipTexture, bodyTemplates["shiptest2"], 20);
+            var ship = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["ship"], 20);
             ship.Body.LocalCenter = Vector2.Zero;
             shipRef = new WeakReference<Ship>(ship);
             
@@ -87,7 +87,7 @@ namespace AetheriumMono.Scenes
             {
                 var go = SetupGameObject(new GameObject(), squareTexture);
                 go.Scale = new Vector2(.2f, .2f);
-                var squareRadius = 500;
+                var squareRadius = 100;
                 go.Position = new Vector2(Mathf.Random(-squareRadius, squareRadius), Mathf.Random(-squareRadius, squareRadius));
             }
 
@@ -180,7 +180,10 @@ namespace AetheriumMono.Scenes
                 }
             }
 
-            //Console.WriteLine(ship.Body.AngularVelocity + " " + fakeAngularVelocity + " " + ship.Body.AngularVelocity / fakeAngularVelocity);
+            if (KeyJustPressed(Keys.F3))
+            {
+                renderColliders = !renderColliders;
+            }
 
             if (destroyed.Count > 0)
             {
@@ -220,18 +223,36 @@ namespace AetheriumMono.Scenes
                 forward -= 1;
             if (keyboard.IsKeyDown(Keys.LeftShift))
             {
-                // strafe mode
+                // Strafe mode
                 if (keyboard.IsKeyDown(Keys.A))
                     strafe -= 1;
                 if (keyboard.IsKeyDown(Keys.D))
                     strafe += 1;
+                if (ship.Body.AngularVelocity > 0)
+                {
+                    rotation = -1;
+                }
+                else if (ship.Body.AngularVelocity < 0)
+                {
+                    rotation = 1;
+                }
             }
             else
             {
+                // Rotate mode
                 if (keyboard.IsKeyDown(Keys.A))
                     rotation += 1;
                 if (keyboard.IsKeyDown(Keys.D))
-                    rotation -= 1;    
+                    rotation -= 1;
+                //var horizontalMovement = Vector2.Dot(ship.Body.LinearVelocity, ship.Right);
+                //if (horizontalMovement > 0)
+                //{
+                //    strafe = -Mathf.Clamp(Mathf.Abs(horizontalMovement), 0, 1);
+                //}
+                //else if (horizontalMovement < 0)
+                //{
+                //    strafe = Mathf.Clamp(Mathf.Abs(horizontalMovement), 0, 1);
+                //}
             }
             ship.Control(forward, strafe, rotation);
 
