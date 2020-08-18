@@ -89,6 +89,7 @@ namespace AetheriumMono.Scenes
                 go.Scale = new Vector2(.2f, .2f);
                 var squareRadius = 100;
                 go.Position = new Vector2(Mathf.Random(-squareRadius, squareRadius), Mathf.Random(-squareRadius, squareRadius));
+                go.Depth = 1;
             }
 
         }
@@ -104,18 +105,18 @@ namespace AetheriumMono.Scenes
             // Calculate VP matrices
             var vp = graphics.Viewport;
             var view = Matrix.CreateLookAt(cameraPosition, cameraPosition + Vector3.Forward, Vector3.Up);
-            var projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, 0, 1);
+            var projection = Matrix.CreateOrthographic(cameraViewWidth, cameraViewWidth / vp.AspectRatio, -1, 1);
             spriteBatchEffect.View = view;
             spriteBatchEffect.Projection = projection;
             polygonEffect.View = view;
             polygonEffect.Projection = projection;
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
+            spriteBatch.Begin(SpriteSortMode.BackToFront, null, null, null, RasterizerState.CullClockwise, spriteBatchEffect);
             foreach (var go in gameObjects)
             {
                 if (go.Texture == null) continue;
                 var origin = new Vector2(go.Texture.Width * 0.5f, go.Texture.Height * 0.5f);
-                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, origin, PTU * go.Scale, SpriteEffects.FlipVertically, 0);
+                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, origin, PTU * go.Scale, SpriteEffects.FlipVertically, go.Depth);
             }
             spriteBatch.End();
 
