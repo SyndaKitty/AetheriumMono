@@ -51,6 +51,7 @@
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Core\Game.cs" />
     <Compile Include="Core\Program.cs" />
+    <Compile Include="Game\IHealth.cs" />
     <Compile Include="Game\Laser.cs" />
     <Compile Include="Game\IBullet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

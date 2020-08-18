@@ -73,9 +73,11 @@ namespace AetheriumMono.Scenes
 
             // Scene setup
             //ship = CreateShip(shipTexture, TemplateFromVertices(shipPolygons, 1.0f), Vector2.Zero, shipTexture, TemplateFromVertices(shipPolygons, 1.0f));
-            ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], new Vector2(0, 0), shipTexture, bodyTemplates["shiptest2"]);
+            
+            var ship = CreateShip(shipTexture, bodyTemplates["shiptest2"], new Vector2(0, 0), shipTexture, bodyTemplates["shiptest2"], 20);
             ship.Body.LocalCenter = Vector2.Zero;
-
+            shipRef = new WeakReference<Ship>(ship);
+            
             //square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
             polygonEffect = new BasicEffect(graphics);
@@ -92,7 +94,8 @@ namespace AetheriumMono.Scenes
         }
 
         PhysicsObject square;
-        Ship ship;
+
+        WeakReference<Ship> shipRef;
 
         bool renderColliders = true;
 
@@ -141,8 +144,13 @@ namespace AetheriumMono.Scenes
 
         public void Update(float deltaTime)
         {
-            cameraPosition.X = ship.Position.X;
-            cameraPosition.Y = ship.Position.Y;
+            {
+                if (shipRef.TryGetTarget(out var ship))
+                {
+                    cameraPosition.X = ship.Position.X;
+                    cameraPosition.Y = ship.Position.Y;
+                }
+            }
 
             previousKeyboard = keyboard;
             keyboard = Keyboard.GetState();
@@ -164,15 +172,35 @@ namespace AetheriumMono.Scenes
 
             // Scene specific
             //square.Body.ApplyForce(Vector2.UnitX * 0.8f);
-            ControlShip();
+
+            {
+                if (shipRef.TryGetTarget(out var ship))
+                {
+                    ControlShip(ship);
+                }
+            }
 
             //Console.WriteLine(ship.Body.AngularVelocity + " " + fakeAngularVelocity + " " + ship.Body.AngularVelocity / fakeAngularVelocity);
 
             if (destroyed.Count > 0)
             {
                 Stopwatch sw = Stopwatch.StartNew();
-                gameObjects.RemoveAll(x => destroyed.Contains(x));
-                physicsObjects.RemoveAll(x => destroyed.Contains(x));
+                foreach (var destroyedGo in destroyed)
+                {
+                    // TODO: Dynamic reference system, tied in with a pooling system
+                    if (shipRef.TryGetTarget(out var ship) && ship == destroyedGo)
+                    {
+                        shipRef.SetTarget(null);
+                    }
+
+                    gameObjects.Remove(destroyedGo);
+                    if (destroyedGo is PhysicsObject po)
+                    {
+                        physicsObjects.Remove(po);
+                        po.Body.Enabled = false;
+                        physicsWorld.RemoveAsync(po.Body);
+                    }
+                }
                 sw.Stop();
                 Console.WriteLine(sw.ElapsedMilliseconds);
                 destroyed.Clear();
@@ -180,7 +208,7 @@ namespace AetheriumMono.Scenes
         }
 
 
-        void ControlShip()
+        void ControlShip(Ship ship)
         {
             float forward = 0;
             float strafe = 0;
@@ -232,11 +260,12 @@ namespace AetheriumMono.Scenes
             return body;
         }
 
-        Ship CreateShip(Texture2D shipTexture, BodyTemplate bodyTemplate, Vector2 position, Texture2D bulletTexture, BodyTemplate bulletTemplate)
+        Ship CreateShip(Texture2D shipTexture, BodyTemplate bodyTemplate, Vector2 position, Texture2D bulletTexture, BodyTemplate bulletTemplate, float health)
         {
             Ship ship = new Ship();
             SetupPhysicsObject(ship, shipTexture, bodyTemplate);
             ship.SetAssets(this, bulletTexture, bulletTemplate);
+            ship.HealthAmount = health;
             return ship;
         }
 

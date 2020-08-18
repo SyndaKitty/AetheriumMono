@@ -2,12 +2,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using tainicom.Aether.Physics2D.Content;
-using tainicom.Aether.Physics2D.Dynamics;
-using tainicom.Aether.Physics2D.Dynamics.Contacts;
 
 namespace AetheriumMono.Game
 {
-    public class Ship : PhysicsObject
+    public class Ship : PhysicsObject, IHealth
     {
         float forwardThrust = 12;
         float strafeThrust = 6;
@@ -19,6 +17,18 @@ namespace AetheriumMono.Game
         IScene scene;
         Texture2D bulletTexture;
         BodyTemplate bulletTemplate;
+
+        public float HealthAmount { get; set; }
+
+        public void TakeDamage(float amount)
+        {
+            HealthAmount -= amount;
+            if (HealthAmount <= 0)
+            {
+                HealthAmount = 0;
+                scene.Destroy(this);
+            }
+        }
 
         public void SetAssets(IScene scene, Texture2D bulletTexture, BodyTemplate bulletTemplate)
         {
@@ -74,10 +84,11 @@ namespace AetheriumMono.Game
 
             var bullet = (Laser)scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale);
             bullet.Scene = scene;
-            bullet.Source = this;
-            bullet.Body.LinearVelocity =/* Body.LinearVelocity +*/ Forward * 10;
+            //bullet.Source = this;
+            bullet.Body.LinearVelocity =/* Body.LinearVelocity +*/ Forward * 2;
             bullet.Body.IsBullet = true;
             bullet.Body.OnCollision += bullet.OnCollision;
+            bullet.Damage = 10;
         }
     }
 }
