@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AetheriumMono.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -63,7 +64,32 @@ namespace AetheriumMono.Test
             testRef = pool.Create(new GameObject {Data = testData});
             Assert.AreEqual(firstIndex, testRef.Index);
         }
-        
+
+        [TestMethod]
+        public void Enumerate()
+        {
+            List<string> testData = new List<string> {"testData1", "testData2", "testData3", "testData4"};
+
+            List<EntityRef<GameObject>> refs = new List<EntityRef<GameObject>>();
+
+            for (int i = 0; i < testData.Count; i++)
+            {
+                string data = testData[i];
+                refs.Add(pool.Create(new GameObject {Data = data}));
+            }
+
+            int removedIndex = 1;
+            pool.Remove(refs[removedIndex]);
+            pool.EndOfFrame();
+            testData.RemoveAt(removedIndex);
+
+            int index = 0;
+            foreach (var gameObject in pool)
+            {
+                Assert.AreEqual(testData[index], gameObject.Data);
+                index++;
+            }
+        }
     }
 
     public class GameObject

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace AetheriumMono.Core
 {
-    public class Pool<T> where T : class
+    public class Pool<T> : IEnumerable<T> where T : class
     {
         List<T> pooledObjects;
         Stack<int> removedPositions;
@@ -55,6 +56,59 @@ namespace AetheriumMono.Core
                 pooledObjects[index] = null;
                 removedPositions.Push(index);
             }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return new Enumerator<T>(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        class Enumerator<T> : IEnumerator<T> where T : class
+        {
+            int index = -1;
+            List<T> pooledObjects;
+
+            public Enumerator(Pool<T> pool)
+            {
+                pooledObjects = pool.pooledObjects;
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                index++;
+                if (index >= pooledObjects.Count)
+                {
+                    return false;
+                }
+
+                while (pooledObjects[index] == null)
+                {
+                    index++;
+                    if (index >= pooledObjects.Count)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            public void Reset()
+            {
+                index = 0;
+            }
+
+            public T Current => pooledObjects[index];
+
+            object IEnumerator.Current => Current;
         }
     }
 
