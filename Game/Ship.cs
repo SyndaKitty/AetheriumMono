@@ -1,5 +1,4 @@
 ﻿using AetheriumMono.Core;
-using AetheriumMono.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using tainicom.Aether.Physics2D.Content;

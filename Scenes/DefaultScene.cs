@@ -13,8 +13,6 @@ using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Content;
 using tainicom.Aether.Physics2D.Dynamics;
-using tainicom.Aether.Physics2D.Dynamics.Contacts;
-
 namespace AetheriumMono.Scenes
 {
     public class DefaultScene : IScene
@@ -38,7 +36,7 @@ namespace AetheriumMono.Scenes
         Pool<GameObject> gameObjects = new Pool<GameObject>();
 
         //List<PhysicsObject> physicsObjects = new List<PhysicsObject>();
-        List<EntityRef<GameObject>> physicsObjects = new List<EntityRef<GameObject>>(256);
+        List<CastRef<PhysicsObject>> physicsObjects = new List<CastRef<PhysicsObject>>(256);
 
         Vector3 cameraPosition;
         float cameraViewWidth = 20;
@@ -77,7 +75,7 @@ namespace AetheriumMono.Scenes
             // Scene setup
             //ship = CreateShip(shipTexture, TemplateFromVertices(shipPolygons, 1.0f), Vector2.Zero, shipTexture, TemplateFromVertices(shipPolygons, 1.0f));
             
-            shipRef = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["ship"], 20);
+            shipRef = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["square"], 20);
             shipRef.Get(out var ship);
             ship.Body.LocalCenter = Vector2.Zero;
 
@@ -308,7 +306,11 @@ namespace AetheriumMono.Scenes
             CalculateVertices(physicsObject);
 
             var entityRef = SetupGameObject(physicsObject, texture);
-            return new CastRef<PhysicsObject>(entityRef);
+            var poRef = new CastRef<PhysicsObject>(entityRef);
+
+            physicsObjects.Add(poRef);
+
+            return poRef;
         }
 
         public void Destroy(EntityRef<GameObject> objectRef)
