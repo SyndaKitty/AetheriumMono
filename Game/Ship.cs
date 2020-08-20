@@ -1,4 +1,6 @@
-﻿using AetheriumMono.Core;
+﻿using System.Collections.Generic;
+using AetheriumMono.Core;
+using AetheriumMono.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using tainicom.Aether.Physics2D.Content;
@@ -17,6 +19,7 @@ namespace AetheriumMono.Game
         IScene scene;
         Texture2D bulletTexture;
         BodyTemplate bulletTemplate;
+        List<IWeapon> weapons;
 
         public float HealthAmount { get; set; }
 
@@ -81,8 +84,18 @@ namespace AetheriumMono.Game
         {
             var creationPosition = Position + Forward * 2;
             var scale = Vector2.One * 0.2f;
+            //bulletTexture, bulletTemplate, creationPosition, scale
+            
+            PhysicsObjectTemplate template = new PhysicsObjectTemplate
+            {
+                Position = creationPosition,
+                BodyTemplate = bulletTemplate,
+                Texture = bulletTexture,
+                PhysicsObject = new Laser(),
+                Scale = scale
+            };
 
-            var bulletRef = scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale).Convert<Laser>();
+            var bulletRef = template.Create(scene).Item1.Convert<Laser>();
             bulletRef.Get(out var bullet);
             bullet.Scene = scene;
             bullet.Source = this;

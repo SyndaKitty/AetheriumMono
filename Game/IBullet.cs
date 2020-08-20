@@ -9,5 +9,6 @@ namespace AetheriumMono.Game
         IScene Scene { get; set; }
         GameObject Source { get; set; }
         bool OnCollision(Fixture bullet, Fixture target, Contact contact);
+        IBullet Clone();
     }
 }

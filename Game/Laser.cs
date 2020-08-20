@@ -16,8 +16,6 @@ namespace AetheriumMono.Game
         {
             if (Disabled) return false;
 
-            Console.WriteLine("OnCollision " + bullet.Body.Tag + " " + target.Body.Tag);
-
             var collision = target.Body.Tag != Source;
 
             if (collision && target.Body.Tag is IHealth health)
@@ -31,6 +29,17 @@ namespace AetheriumMono.Game
                 Self.Remove();
             }
             return collision;
+        }
+
+        public IBullet Clone()
+        {
+            return new Laser
+            {
+                Scene = Scene,
+                Source = Source,
+                Damage = Damage,
+                Disabled = Disabled
+            };
         }
     }
 }

@@ -10,3 +10,10 @@ square.png:
     detectHoles: false
     scaleFactor: 10
     tolerance: 0.1
+#default
+#  scene:
+#    ship:
+#      texture: Hulls/ship.png
+#      dynamic: 
+#        asteroid:
+#            1-100

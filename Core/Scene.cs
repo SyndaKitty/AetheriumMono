@@ -15,15 +15,9 @@ namespace AetheriumMono.Core
 
         void Update(float deltaTime);
 
-        EntityRef<GameObject> SetupGameObject(GameObject gameObject, Texture2D texture);
+        EntityRef<GameObject> SetupGameObject(GameObject gameObject);
         
-        CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate);
-
-        CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate,
-            Vector2 position);
-
-        CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate,
-            Vector2 position, Vector2 scale);
+        CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, BodyTemplate bodyTemplate);
 
     }
 }
