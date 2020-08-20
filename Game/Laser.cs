@@ -31,7 +31,6 @@ namespace AetheriumMono.Game
                 Scene.Destroy(this);
             }
             return collision;
-
         }
     }
 }
