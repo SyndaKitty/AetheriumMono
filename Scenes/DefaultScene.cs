@@ -34,9 +34,12 @@ namespace AetheriumMono.Scenes
         LiveContent liveContent;
         Dictionary<string, BodyTemplate> bodyTemplates;
 
-        List<GameObject> gameObjects = new List<GameObject>(256);
-        List<PhysicsObject> physicsObjects = new List<PhysicsObject>(256);
-        List<GameObject> destroyed = new List<GameObject>();
+        //List<GameObject> gameObjects = new List<GameObject>();
+        Pool<GameObject> gameObjects = new Pool<GameObject>();
+
+        //List<PhysicsObject> physicsObjects = new List<PhysicsObject>();
+        List<EntityRef<GameObject>> physicsObjects = new List<EntityRef<GameObject>>(256);
+
         Vector3 cameraPosition;
         float cameraViewWidth = 20;
 
@@ -74,10 +77,10 @@ namespace AetheriumMono.Scenes
             // Scene setup
             //ship = CreateShip(shipTexture, TemplateFromVertices(shipPolygons, 1.0f), Vector2.Zero, shipTexture, TemplateFromVertices(shipPolygons, 1.0f));
             
-            var ship = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["ship"], 20);
+            shipRef = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["ship"], 20);
+            shipRef.Get(out var ship);
             ship.Body.LocalCenter = Vector2.Zero;
-            shipRef = new WeakReference<Ship>(ship);
-            
+
             //square = SetupPhysicsObject(new PhysicsObject(), squareTexture, bodyTemplates["Square"], new Vector2(-10, 2.5f));
 
             polygonEffect = new BasicEffect(graphics);
@@ -85,7 +88,8 @@ namespace AetheriumMono.Scenes
 
             for (int i = 0; i < 10000; i++)
             {
-                var go = SetupGameObject(new GameObject(), squareTexture);
+                var goRef = SetupGameObject(new GameObject(), squareTexture);
+                goRef.Get(out var go);
                 go.Scale = new Vector2(.2f, .2f);
                 var squareRadius = 100;
                 go.Position = new Vector2(Mathf.Random(-squareRadius, squareRadius), Mathf.Random(-squareRadius, squareRadius));
@@ -96,7 +100,7 @@ namespace AetheriumMono.Scenes
 
         PhysicsObject square;
 
-        WeakReference<Ship> shipRef;
+        CastRef<Ship> shipRef;
 
         bool renderColliders = true;
 
@@ -122,8 +126,11 @@ namespace AetheriumMono.Scenes
 
             if (renderColliders)
             {
-                foreach (var physicsObject in physicsObjects)
+                foreach (var poref in physicsObjects)
                 {
+                    if (!poref.Get(out var go)) continue;
+                    var physicsObject = (PhysicsObject) go;
+
                     polygonEffect.World = Matrix.CreateRotationZ(physicsObject.Rotation) *
                                           Matrix.CreateTranslation(new Vector3(physicsObject.Position, 0));
                     polygonEffect.CurrentTechnique.Passes[0].Apply();
@@ -146,7 +153,7 @@ namespace AetheriumMono.Scenes
         public void Update(float deltaTime)
         {
             {
-                if (shipRef.TryGetTarget(out var ship))
+                if (shipRef.Get(out var ship))
                 {
                     cameraPosition.X = ship.Position.X;
                     cameraPosition.Y = ship.Position.Y;
@@ -163,8 +170,11 @@ namespace AetheriumMono.Scenes
             //sw.Stop();
             //Console.WriteLine(sw.ElapsedMilliseconds);
 
-            foreach (var physicsObject in physicsObjects)
+            foreach (var poref in physicsObjects)
             {
+                if (!poref.Get(out var go)) continue;
+                var physicsObject = (PhysicsObject) go;
+
                 var body = physicsObject.Body;
 
                 physicsObject.Position = body.Position;
@@ -175,7 +185,7 @@ namespace AetheriumMono.Scenes
             //square.Body.ApplyForce(Vector2.UnitX * 0.8f);
 
             {
-                if (shipRef.TryGetTarget(out var ship))
+                if (shipRef.Get(out var ship))
                 {
                     ControlShip(ship);
                 }
@@ -186,29 +196,7 @@ namespace AetheriumMono.Scenes
                 renderColliders = !renderColliders;
             }
 
-            if (destroyed.Count > 0)
-            {
-                Stopwatch sw = Stopwatch.StartNew();
-                foreach (var destroyedGo in destroyed)
-                {
-                    // TODO: Dynamic reference system, tied in with a pooling system
-                    if (shipRef.TryGetTarget(out var ship) && ship == destroyedGo)
-                    {
-                        shipRef.SetTarget(null);
-                    }
-
-                    gameObjects.Remove(destroyedGo);
-                    if (destroyedGo is PhysicsObject po)
-                    {
-                        physicsObjects.Remove(po);
-                        po.Body.Enabled = false;
-                        physicsWorld.RemoveAsync(po.Body);
-                    }
-                }
-                sw.Stop();
-                Console.WriteLine(sw.ElapsedMilliseconds);
-                destroyed.Clear();
-            }
+            gameObjects.EndOfFrame();
         }
 
 
@@ -282,13 +270,12 @@ namespace AetheriumMono.Scenes
             return body;
         }
 
-        Ship CreateShip(Texture2D shipTexture, BodyTemplate bodyTemplate, Vector2 position, Texture2D bulletTexture, BodyTemplate bulletTemplate, float health)
+        CastRef<Ship> CreateShip(Texture2D shipTexture, BodyTemplate bodyTemplate, Vector2 position, Texture2D bulletTexture, BodyTemplate bulletTemplate, float health)
         {
             Ship ship = new Ship();
-            SetupPhysicsObject(ship, shipTexture, bodyTemplate);
             ship.SetAssets(this, bulletTexture, bulletTemplate);
             ship.HealthAmount = health;
-            return ship;
+            return SetupPhysicsObject(ship, shipTexture, bodyTemplate).Convert<Ship>();
         }
 
         Body CreateDynamicBody(BodyTemplate bodyTemplate)
@@ -300,13 +287,13 @@ namespace AetheriumMono.Scenes
         }
 
 
-        public PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate)
+        public CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate)
             => SetupPhysicsObject(physicsObject, texture, bodyTemplate, Vector2.Zero);
 
-        public PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate, Vector2 position)
+        public CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate, Vector2 position)
             => SetupPhysicsObject(physicsObject, texture, bodyTemplate, position, Vector2.One);
 
-        public PhysicsObject SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate, Vector2 position, Vector2 scale)
+        public CastRef<PhysicsObject> SetupPhysicsObject(PhysicsObject physicsObject, Texture2D texture, BodyTemplate bodyTemplate, Vector2 position, Vector2 scale)
         {
             // Scale vertices of body template
             BodyTemplate bodyTemplateCopy = bodyTemplate.Scale(scale);
@@ -320,14 +307,18 @@ namespace AetheriumMono.Scenes
 
             CalculateVertices(physicsObject);
 
-            physicsObjects.Add(physicsObject);
-            SetupGameObject(physicsObject, texture);
-            return physicsObject;
+            var entityRef = SetupGameObject(physicsObject, texture);
+            return new CastRef<PhysicsObject>(entityRef);
         }
 
-        public void Destroy(GameObject go)
+        public void Destroy(EntityRef<GameObject> objectRef)
         {
-            destroyed.Add(go);
+            gameObjects.Remove(objectRef);
+        }
+
+        public void Destroy<T>(CastRef<T> castRef) where T : GameObject
+        {
+            gameObjects.Remove(castRef.EntityRef);
         }
 
         void CalculateVertices(PhysicsObject physicsObject)
@@ -383,11 +374,12 @@ namespace AetheriumMono.Scenes
             physicsObject.LineIndices = lineIndices.ToArray();
         }
 
-        public GameObject SetupGameObject(GameObject gameObject, Texture2D texture)
+        public EntityRef<GameObject> SetupGameObject(GameObject gameObject, Texture2D texture)
         {
             gameObject.Texture = texture;
-            gameObjects.Add(gameObject);
-            return gameObject;
+            var entityRef = gameObjects.Create(gameObject);
+            gameObject.Self = entityRef;
+            return entityRef;
         }
 
         #endregion

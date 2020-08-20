@@ -12,5 +12,6 @@ namespace AetheriumMono.Core
 
         public virtual float Rotation { get; set; }
         public Texture2D Texture;
+        public EntityRef<GameObject> Self { get; set; }
     }
 }

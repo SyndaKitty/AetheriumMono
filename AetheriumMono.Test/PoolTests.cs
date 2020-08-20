@@ -51,6 +51,25 @@ namespace AetheriumMono.Test
         }
 
         [TestMethod]
+        public void ObjectRemoved_Reassign()
+        {
+            string testData = "TestData1";
+            EntityRef<GameObject> testRef = pool.Create(new GameObject {Data = testData});
+
+            pool.Remove(testRef);
+            pool.EndOfFrame();
+
+            Assert.IsFalse(testRef.Get(out var entity));
+            Assert.AreEqual(null, entity);
+
+            string testData2 = "testData2";
+            EntityRef<GameObject> testRef2 = pool.Create(new GameObject {Data = testData2});
+
+            Assert.IsTrue(testRef2.Get(out entity));
+            Assert.AreEqual(testData2, entity.Data);
+        }
+
+        [TestMethod]
         public void IndexReused()
         {
             string testData = "TestData";

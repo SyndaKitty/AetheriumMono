@@ -42,6 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Core\CastRef.cs" />
     <Compile Include="Core\LiveContent.cs" />
     <Compile Include="Core\PhysicsObject.cs" />
     <Compile Include="Core\Pool.cs" />

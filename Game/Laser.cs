@@ -28,7 +28,7 @@ namespace AetheriumMono.Game
             if (collision)
             {
                 Disabled = true;
-                Scene.Destroy(this);
+                Self.Remove();
             }
             return collision;
         }

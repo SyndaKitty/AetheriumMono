@@ -27,7 +27,7 @@ namespace AetheriumMono.Game
             if (HealthAmount <= 0)
             {
                 HealthAmount = 0;
-                scene.Destroy(this);
+                Self.Remove();
             }
         }
 
@@ -83,7 +83,8 @@ namespace AetheriumMono.Game
             var creationPosition = Position + Forward * 2;
             var scale = Vector2.One * 0.2f;
 
-            var bullet = (Laser)scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale);
+            var bulletRef = scene.SetupPhysicsObject(new Laser(), bulletTexture, bulletTemplate, creationPosition, scale).Convert<Laser>();
+            bulletRef.Get(out var bullet);
             bullet.Scene = scene;
             bullet.Source = this;
             bullet.Body.LinearVelocity = Body.LinearVelocity + Forward * 10;

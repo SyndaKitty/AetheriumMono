@@ -31,6 +31,7 @@ namespace AetheriumMono.Core
             if (removedPositions.Count > 0)
             {
                 index = removedPositions.Pop();
+                pooledObjects[index] = t;
             }
             else
             {
@@ -127,6 +128,11 @@ namespace AetheriumMono.Core
         public bool Get(out T entity)
         {
             return parentPool.Get(Index, out entity);
+        }
+
+        public void Remove()
+        {
+            parentPool.Remove(this);
         }
     }
 }
