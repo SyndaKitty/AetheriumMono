@@ -26,7 +26,7 @@ namespace AetheriumMono.Data
 
             if (!Offset.HasValue)
             {
-                Offset = new Vector2(Texture.Width, Texture.Height);
+                gameObject.Offset = new Vector2(Texture.Width * 0.5f, Texture.Height * 0.5f);
             }
 
             return (scene.SetupGameObject(gameObject), gameObject);

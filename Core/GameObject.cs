@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace AetheriumMono.Core
@@ -14,5 +13,6 @@ namespace AetheriumMono.Core
         public virtual float Rotation { get; set; }
         public Texture2D Texture;
         public EntityRef<GameObject> Self { get; set; }
+        
     }
 }

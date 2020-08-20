@@ -30,11 +30,10 @@ namespace AetheriumMono.Scenes
         LiveContent liveContent;
         Dictionary<string, BodyTemplate> bodyTemplates;
 
-        //List<GameObject> gameObjects = new List<GameObject>();
         Pool<GameObject> gameObjects = new Pool<GameObject>();
 
-        //List<PhysicsObject> physicsObjects = new List<PhysicsObject>();
         List<CastRef<PhysicsObject>> physicsObjects = new List<CastRef<PhysicsObject>>(256);
+        List<Body> removedBodies = new List<Body>();
 
         Vector3 cameraPosition;
         float cameraViewWidth = 20;
@@ -68,7 +67,7 @@ namespace AetheriumMono.Scenes
             bodyTemplates = PhysicsShapeLoader.LoadBodies(File.ReadAllText("./content/Bodies.xml"));
 
             // Scene setup
-            var enemyShipRef = CreateShip(shipTexture, bodyTemplates["ship (2)"], new Vector2(-5, 0), shipTexture, bodyTemplates["square"], 100);
+            var enemyShipRef = CreateShip(shipTexture, bodyTemplates["ship (2)"], new Vector2(-5, 0), shipTexture, bodyTemplates["square"], 40);
 
             shipRef = CreateShip(shipTexture, bodyTemplates["ship (2)"], new Vector2(0, 0), shipTexture, bodyTemplates["square"], 20);
 
@@ -107,8 +106,7 @@ namespace AetheriumMono.Scenes
             foreach (var go in gameObjects)
             {
                 if (go.Texture == null) continue;
-                var origin = new Vector2(go.Texture.Width * 0.5f, go.Texture.Height * 0.5f);
-                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, origin, PTU * go.Scale, SpriteEffects.FlipVertically, go.Depth);
+                spriteBatch.Draw(go.Texture, go.Position, null, Color.White, go.Rotation, go.Offset, PTU * go.Scale, SpriteEffects.FlipVertically, go.Depth);
             }
             spriteBatch.End();
 
@@ -182,6 +180,12 @@ namespace AetheriumMono.Scenes
                 renderColliders = !renderColliders;
             }
 
+            foreach (var removedBody in removedBodies)
+            {
+                physicsWorld.Remove(removedBody);
+            }
+            removedBodies.Clear();
+
             gameObjects.EndOfFrame();
         }
 
@@ -242,20 +246,6 @@ namespace AetheriumMono.Scenes
 
         #region Creation Methods
 
-        BodyTemplate TemplateFromVertices(List<Vertices> vertices, float density)
-        {
-            BodyTemplate body = new BodyTemplate();
-
-            foreach (var polygon in vertices)
-            {
-                var fixture = new FixtureTemplate();
-                fixture.Shape = new PolygonShape(polygon, density);
-                body.Fixtures.Add(fixture);
-            }
-
-            return body;
-        }
-
         CastRef<Ship> CreateShip(Texture2D shipTexture, BodyTemplate bodyTemplate, Vector2 position, Texture2D bulletTexture, BodyTemplate bulletTemplate, float health)
         {
             Ship ship = new Ship();
@@ -282,12 +272,22 @@ namespace AetheriumMono.Scenes
 
             physicsObject.Body = body;
 
+
             var entityRef = SetupGameObject(physicsObject);
             var poRef = new CastRef<PhysicsObject>(entityRef);
+
+            poRef.EntityRef.RegisterRemovedCallback(PhysicsObjectDestroyed);
 
             physicsObjects.Add(poRef);
 
             return poRef;
+        }
+
+        void PhysicsObjectDestroyed(GameObject go)
+        {
+            var po = (PhysicsObject) go;
+            if (po.Body == null) return;
+            removedBodies.Add(po.Body);
         }
 
         public void Destroy(EntityRef<GameObject> objectRef)

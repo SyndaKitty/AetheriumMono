@@ -43,7 +43,7 @@ namespace AetheriumMono.Data
 
             if (!Offset.HasValue)
             {
-                Offset = new Vector2(Texture.Width, Texture.Height);
+                physicsObject.Offset = new Vector2(Texture.Width * 0.5f, Texture.Height * 0.5f);
             }
 
             return (poref, physicsObject);

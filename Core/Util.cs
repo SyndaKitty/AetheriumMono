@@ -39,5 +39,10 @@ namespace AetheriumMono.Core
 
             return newBodyTemplate;
         }
+
+        public static void RegisterRemovedCallback<T>(this EntityRef<T> entityRef, EntityRemoved<T> funcs) where T : class
+        {
+            entityRef.ParentPool.RegisterRemovedEvent(entityRef, funcs);
+        }
     }
 }

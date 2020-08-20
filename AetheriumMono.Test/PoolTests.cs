@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AetheriumMono.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -108,6 +109,24 @@ namespace AetheriumMono.Test
                 Assert.AreEqual(testData[index], gameObject.Data);
                 index++;
             }
+        }
+
+        [TestMethod]
+        public void RegisterRemoveEvent()
+        {
+            string testData1 = "TestData1";
+            string testData2 = "TestData2";
+
+            var go = new GameObject {Data = testData1};
+            EntityRef<GameObject> testRef = pool.Create(go);
+
+            string test = testData1;
+
+            testRef.RegisterRemovedCallback((go) => test = testData2);
+
+            pool.Remove(testRef);
+            
+            Assert.AreEqual(testData2, test);
         }
     }
 
