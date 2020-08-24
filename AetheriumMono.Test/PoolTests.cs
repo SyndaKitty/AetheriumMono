@@ -128,6 +128,22 @@ namespace AetheriumMono.Test
             
             Assert.AreEqual(testData2, test);
         }
+
+        [TestMethod]
+        public void ReferenceInvalidated()
+        {
+            string testData1 = "TestData1";
+            string testData2 = "TestData2";
+        
+            EntityRef<GameObject> reference = pool.Create(new GameObject{Data=testData1});
+            reference.Remove();
+            pool.EndOfFrame();
+
+            Assert.IsFalse(reference.Get(out GameObject _));
+
+            pool.Create(new GameObject {Data = testData2});
+            Assert.IsFalse(reference.Get(out GameObject _));
+        }
     }
 
     public class GameObject
