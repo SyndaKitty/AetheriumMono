@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using tainicom.Aether.Physics2D.Collision.Shapes;
 using tainicom.Aether.Physics2D.Common;
 using tainicom.Aether.Physics2D.Content;
 using tainicom.Aether.Physics2D.Dynamics;
@@ -25,6 +24,9 @@ namespace AetheriumMono.Scenes
         KeyboardState keyboard;
         KeyboardState previousKeyboard;
 
+        MouseState mouse;
+        MouseState previousMouse;
+
         const float PTU = 1f / 500;
 
         LiveContent liveContent;
@@ -36,9 +38,9 @@ namespace AetheriumMono.Scenes
         List<Body> removedBodies = new List<Body>();
 
         Vector3 cameraPosition;
-        float cameraViewWidth = 20;
+        float cameraViewWidth = 40;
         CastRef<Ship> shipRef;
-        bool renderColliders = true;
+        bool renderColliders;
 
         public DefaultScene(GraphicsDevice graphics)
         {
@@ -61,33 +63,50 @@ namespace AetheriumMono.Scenes
             
             Texture2D shipTexture = liveContent.GetTexture("Hulls/ship.png");
             Texture2D squareTexture = liveContent.GetTexture("square.png");
-            List<Vertices> shipPolygons = liveContent.GetPolygons("Hulls/ship.png");
+            Texture2D asteroid1Texture = liveContent.GetTexture("Sprites/Asteroids/asteroid1.png");
+            Texture2D asteroid2Texture = liveContent.GetTexture("Sprites/Asteroids/asteroid2.png");
+            Texture2D asteroid3Texture = liveContent.GetTexture("Sprites/Asteroids/asteroid3.png");
+            Texture2D asteroid4Texture = liveContent.GetTexture("Sprites/Asteroids/asteroid4.png");
+            Texture2D[] asteroidTextures = {asteroid1Texture, asteroid2Texture, asteroid3Texture, asteroid4Texture};
 
             // Body templates
             bodyTemplates = PhysicsShapeLoader.LoadBodies(File.ReadAllText("./content/Bodies.xml"));
 
             // Scene setup
-            var enemyShipRef = CreateShip(shipTexture, bodyTemplates["ship (2)"], new Vector2(-5, 0), shipTexture, bodyTemplates["square"], 40);
+            
+            var enemyShipRef = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(-5, 0), shipTexture, bodyTemplates["square"], 40);
+            shipRef = CreateShip(shipTexture, bodyTemplates["ship"], new Vector2(0, 0), shipTexture, bodyTemplates["square"], 20);
+            
+            PhysicsObjectTemplate[] asteroidTemplates = new PhysicsObjectTemplate[4];
+            for (int j = 0; j < 4; j++)
+            {
+                asteroidTemplates[j] = new PhysicsObjectTemplate
+                {
+                    BodyTemplate = bodyTemplates[$"asteroid{j+1}"],
+                    Texture = asteroidTextures[j]
+                };
+            }
+            for (int i = 0; i < 200; i++)
+            {
+                var type = (int)(Mathf.Bias(Mathf.Random(0, 1), 0.3f) * 4);
+                var template = asteroidTemplates[type];
+                
+                float radius = 100;
+                do
+                {
+                    template.Position = new Vector2(Mathf.Random(-radius, radius), Mathf.Random(-radius, radius));
 
-            shipRef = CreateShip(shipTexture, bodyTemplates["ship (2)"], new Vector2(0, 0), shipTexture, bodyTemplates["square"], 20);
+                } while (template.Position.LengthSquared() < 100);
+
+                var po = template.Create(this).Item2;
+                po.Body.Rotation = Mathf.Random(0, Mathf.TAU);
+                po.Body.AngularVelocity = Mathf.Random(-1, 1) / po.Body.Mass;
+                po.Body.LinearVelocity = Mathf.Random(0, 0.1f) * Mathf.RandomUnit() / po.Body.Mass;
+            }
+
 
             polygonEffect = new BasicEffect(graphics);
             polygonEffect.VertexColorEnabled = true;
-
-            // TODO: fix this!
-            var starTemplate = new GameObjectTemplate
-            {
-                Texture = squareTexture,
-                Scale = new Vector2(.2f, .2f),
-                Depth = 1
-            };
-
-            for (int i = 0; i < 10000; i++)
-            {
-                var squareRadius = 100;
-                var (goRef, go) = starTemplate.Create(this);
-                go.Position = new Vector2(Mathf.Random(-squareRadius, squareRadius), Mathf.Random(-squareRadius, squareRadius));
-            }
 
         }
 
@@ -115,7 +134,7 @@ namespace AetheriumMono.Scenes
                 foreach (var poref in physicsObjects)
                 {
                     if (!poref.Get(out var go)) continue;
-                    var physicsObject = (PhysicsObject) go;
+                    var physicsObject = go;
 
                     polygonEffect.World = Matrix.CreateRotationZ(physicsObject.Rotation) *
                                           Matrix.CreateTranslation(new Vector3(physicsObject.Position, 0));
@@ -149,6 +168,9 @@ namespace AetheriumMono.Scenes
             previousKeyboard = keyboard;
             keyboard = Keyboard.GetState();
 
+            previousMouse = mouse;
+            mouse = Mouse.GetState();
+
             //Stopwatch sw = Stopwatch.StartNew();
             physicsWorld.Step(deltaTime);
             //sw.Stop();
@@ -157,16 +179,12 @@ namespace AetheriumMono.Scenes
             foreach (var poref in physicsObjects)
             {
                 if (!poref.Get(out var go)) continue;
-                var physicsObject = (PhysicsObject) go;
 
-                var body = physicsObject.Body;
+                var body = go.Body;
 
-                physicsObject.Position = body.Position;
-                physicsObject.Rotation = body.Rotation;
+                go.Position = body.Position;
+                go.Rotation = body.Rotation;
             }
-
-            // Scene specific
-            //square.Body.ApplyForce(Vector2.UnitX * 0.8f);
 
             {
                 if (shipRef.Get(out var ship))
@@ -175,10 +193,17 @@ namespace AetheriumMono.Scenes
                 }
             }
 
+            if (KeyJustPressed(Keys.Escape))
+            {
+                Environment.Exit(0);
+            }
+
             if (KeyJustPressed(Keys.F3))
             {
                 renderColliders = !renderColliders;
             }
+
+            cameraViewWidth = Mathf.Clamp(cameraViewWidth + ScrollAmount() * 0.05f, 10, 150);
 
             foreach (var removedBody in removedBodies)
             {
@@ -242,6 +267,11 @@ namespace AetheriumMono.Scenes
         public bool KeyJustPressed(Keys key)
         {
             return !previousKeyboard.IsKeyDown(key) && keyboard.IsKeyDown(key);
+        }
+
+        public int ScrollAmount()
+        {
+            return -(mouse.ScrollWheelValue - previousMouse.ScrollWheelValue);
         }
 
         #region Creation Methods

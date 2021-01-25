@@ -75,11 +75,13 @@ namespace AetheriumMono.Core
                     case "texture": 
                         LoadTexture(assetKey, method.ImportData);
                         break;
-                    case "texturePolygons":
-                        var texture = textureCache[assetKey];
-                        LoadPolygons(assetKey, texture, method.ImportData);
-                        break;
+                    //case "texturePolygons":
+                    //    var texture = textureCache[assetKey];
+                    //    LoadPolygons(assetKey, texture, method.ImportData);
+                    //    break;
 
+                    default:
+                        throw new NotImplementedException(method.Name + " import method not implemented");
                 }
             }
         }
@@ -110,45 +112,45 @@ namespace AetheriumMono.Core
         #endregion Textures
 
         #region Polygons
-        void LoadPolygons(string assetKey, Texture2D texture, ImportData importData)
-        {
-            assetKey = assetKey.ToLower();
-            float scaleFactor = 1f / importData.GetInt("scaleFactor");
-            bool detectHoles = importData.GetBool("detectHoles");
-            float tolerance = importData.GetFloat("tolerance");
+        //void LoadPolygons(string assetKey, Texture2D texture, ImportData importData)
+        //{
+        //    assetKey = assetKey.ToLower();
+        //    float scaleFactor = 1f / importData.GetInt("scaleFactor");
+        //    bool detectHoles = importData.GetBool("detectHoles");
+        //    float tolerance = importData.GetFloat("tolerance");
 
-            //Create an array to hold the data from the texture
-            uint[] textureData = new uint[texture.Width * texture.Height];
+        //    //Create an array to hold the data from the texture
+        //    uint[] textureData = new uint[texture.Width * texture.Height];
 
-            //Transfer the texture data to the array
-            texture.GetData(textureData);
+        //    //Transfer the texture data to the array
+        //    texture.GetData(textureData);
 
-            //Find the vertices that makes up the outline of the shape in the texture
-            Vertices outline = PolygonTools.CreatePolygon(textureData, texture.Width, detectHoles);
-            Vector2 centroid = -outline.GetCentroid();
-            outline.Translate(ref centroid);
-            outline = SimplifyTools.DouglasPeuckerSimplify(outline, tolerance);
-            List<Vertices> result = Triangulate.ConvexPartition(outline, TriangulationAlgorithm.Bayazit);
-            Vector2 scale = new Vector2(scaleFactor, -scaleFactor);
-            foreach (Vertices vertices in result)
-            {
-                vertices.Scale(ref scale);
-            }
+        //    //Find the vertices that makes up the outline of the shape in the texture
+        //    Vertices outline = PolygonTools.CreatePolygon(textureData, texture.Width, detectHoles);
+        //    Vector2 centroid = -outline.GetCentroid();
+        //    outline.Translate(ref centroid);
+        //    outline = SimplifyTools.DouglasPeuckerSimplify(outline, tolerance);
+        //    List<Vertices> result = Triangulate.ConvexPartition(outline, TriangulationAlgorithm.Bayazit);
+        //    Vector2 scale = new Vector2(scaleFactor, -scaleFactor);
+        //    foreach (Vertices vertices in result)
+        //    {
+        //        vertices.Scale(ref scale);
+        //    }
 
-            polygonCache[assetKey] = result;
-        }
+        //    polygonCache[assetKey] = result;
+        //}
 
-        public List<Vertices> GetPolygons(string assetKey)
-        {
-            assetKey = assetKey.ToLower();
-            if (polygonCache.TryGetValue(assetKey, out var cachedPolygons))
-            {
-                return cachedPolygons;
-            }
+        //public List<Vertices> GetPolygons(string assetKey)
+        //{
+        //    assetKey = assetKey.ToLower();
+        //    if (polygonCache.TryGetValue(assetKey, out var cachedPolygons))
+        //    {
+        //        return cachedPolygons;
+        //    }
 
-            LoadAsset(assetKey);
-            return polygonCache[assetKey];
-        }
+        //    LoadAsset(assetKey);
+        //    return polygonCache[assetKey];
+        //}
         #endregion Polygons
 
         public void Dispose()

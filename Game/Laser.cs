@@ -1,5 +1,4 @@
-﻿using System;
-using AetheriumMono.Core;
+﻿using AetheriumMono.Core;
 using tainicom.Aether.Physics2D.Dynamics;
 using tainicom.Aether.Physics2D.Dynamics.Contacts;
 

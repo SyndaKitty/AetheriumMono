@@ -1,15 +1,26 @@
 Hulls/ship.png:
   texture:
-  texturePolygons:
-    detectHoles: true
-    scaleFactor: 500
-    tolerance: 0
+#  texturePolygons:
+#    detectHoles: true
+#    scaleFactor: 500
+#    tolerance: 0
 square.png:
   texture:
-  texturePolygons:
-    detectHoles: false
-    scaleFactor: 10
-    tolerance: 0.1
+#  texturePolygons:
+#    detectHoles: false
+#    scaleFactor: 10
+#    tolerance: 0.1
+Sprites/Asteroids/asteroid1.png:
+    texture:
+Sprites/Asteroids/asteroid2.png:
+    texture:
+Sprites/Asteroids/asteroid3.png:
+    texture:
+Sprites/Asteroids/asteroid4.png:
+    texture:
+#    texturePolygons:
+#    scaleFactor: 10
+#    tolerance: 0.1
 #default
 #  scene:
 #    ship:
